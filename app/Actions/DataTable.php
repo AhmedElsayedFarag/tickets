@@ -40,9 +40,11 @@ class DataTable extends Action
 
         // Fetch records
         $records = $this->model->orderBy($columnName, $columnSortOrder)
-            ->where('tasks.text', 'like', '%' . $searchValue . '%')
-            ->orWhere('tasks.status', 'like', '%' . $searchValue . '%')
-            ->orWhereIN('tasks.user_id', User::where('first_name','like','%'.$searchValue.'%')->orWhere('last_name','like','%'.$searchValue.'%')->pluck('id')->toArray() )
+            ->when($searchValue != null, function ($q) use ($searchValue) {
+                $q->where('tasks.text', 'like', '%' . $searchValue . '%');
+                $q->orWhere('tasks.status', 'like', '%' . $searchValue . '%');
+                $q->orWhereIN('tasks.user_id', User::where('first_name', 'like', '%' . $searchValue . '%')->orWhere('last_name', 'like', '%' . $searchValue . '%')->pluck('id')->toArray());
+            })
             ->select('tasks.*')
             ->skip($start)
             ->take($rowperpage)
@@ -54,19 +56,19 @@ class DataTable extends Action
             $id = $record->id;
             $text = $record->text;
             $user = $record->user->name ?? '';
-            $image =($record->image)?'<a href="'.$record->image.'">Open file</a>':'';
+            $image = ($record->image) ? '<a href="' . $record->image . '">Open file</a>' : '';
             $status = $record->status;
             $options = '';
             if (auth()->user()->hasPermissionTo('update tasks')) {
                 $options .= '<a href="' . route('tasks.edit', $record->id) . '" class="btn btn-primary btn-sm"><i class="feather icon-edit"></i></a>';
             }
             if (auth()->user()->hasPermissionTo('delete tasks')) {
-                $options .= '                                                                                        <a onclick="fireDeleteEvent('.$record->id.')" type="button"
+                $options .= '                                                                                        <a onclick="fireDeleteEvent(' . $record->id . ')" type="button"
                                                                                            class="btn btn-danger btn-sm"><i class="feather icon-trash"></i></a>
-                                                                                        <form action="'.route('tasks.destroy',$record->id).'" method="POST"
-                                                                                              id="form-'.$record->id.'">
-                                                                                            '.csrf_field().'
-                                                                                            '.method_field('DELETE').'
+                                                                                        <form action="' . route('tasks.destroy', $record->id) . '" method="POST"
+                                                                                              id="form-' . $record->id . '">
+                                                                                            ' . csrf_field() . '
+                                                                                            ' . method_field('DELETE') . '
                                                                                         </form>';
             }
 
