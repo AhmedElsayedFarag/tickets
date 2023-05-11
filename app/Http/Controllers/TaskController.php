@@ -6,6 +6,7 @@ use App\Actions\DataTable;
 use App\Actions\GetUserTasks;
 use App\Actions\SendFireBaseNotification;
 use App\Http\Requests\Task\CreateRequest;
+use App\Models\Comment;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -66,6 +67,15 @@ class TaskController extends Controller
     public function destroy($id)
     {
         Task::findOrFail($id)->delete();
+        return redirect()->back();
+    }
+    public function addComment($id,Request $request){
+        $comment = new Comment();
+        $comment->user_id = auth()->id();
+        $comment->comment = $request->comment;
+        $comment->task_id = $id;
+        $comment->save();
+        Session::flash('message', 'Commented Successfully');
         return redirect()->back();
     }
 }

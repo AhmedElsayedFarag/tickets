@@ -32,6 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('departments', DepartmentController::class);
     Route::resource('tasks', TaskController::class);
+    Route::post('tasks/{id}/add-comment', [TaskController::class, 'addComment'])->name('tasks.comment');
+
 });
 
 Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
